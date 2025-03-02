@@ -1,6 +1,101 @@
 /*
  * EMAIL INPUT FIX FOR STICK FIGHTER GAME
  * 
+ * This file implements a fix for the email input functionality
+ * using a DOM input element approach.
+ */
+
+// This function will be called after the sketch.js setup function
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a bit to ensure p5.js is fully initialized
+  setTimeout(function() {
+    console.log("Email input fix applied");
+    
+    // Get the canvas element
+    let canvas = document.querySelector('canvas');
+    if (!canvas) {
+      console.error("Canvas element not found");
+      return;
+    }
+    
+    // Add a click event listener to the canvas
+    canvas.addEventListener('click', function(event) {
+      // Only proceed if we're in the ended state
+      if (window.gameState !== 'ended') return;
+      
+      // Get canvas position and dimensions
+      let rect = canvas.getBoundingClientRect();
+      let scaleX = canvas.width / rect.width;
+      let scaleY = canvas.height / rect.height;
+      
+      // Convert click position to canvas coordinates
+      let canvasX = (event.clientX - rect.left) * scaleX;
+      let canvasY = (event.clientY - rect.top) * scaleY;
+      
+      // Check if email input area was clicked
+      if (!window.emailSubmitted && 
+          canvasX > window.width/2 - 125 && canvasX < window.width/2 + 125 && 
+          canvasY > window.height/2 && canvasY < window.height/2 + 30) {
+        
+        // Calculate the absolute position for the input field
+        let inputX = rect.left + (window.width/2 - 125) * (rect.width / canvas.width);
+        let inputY = rect.top + (window.height/2) * (rect.height / canvas.height);
+        
+        // Position and show the input field
+        window.emailInputField.position(inputX, inputY);
+        window.emailInputField.show();
+        window.emailInputField.elt.focus();
+        window.emailInputActive = true;
+        
+        console.log("Email input field activated at", inputX, inputY);
+      }
+    });
+    
+    // Add a global click handler to detect clicks outside the input
+    document.addEventListener('click', function(event) {
+      // Only handle if email input is active
+      if (window.gameState !== 'ended' || !window.emailInputActive) return;
+      
+      // Check if click is outside the input element
+      if (event.target !== window.emailInputField.elt) {
+        // Update playerEmail with the current value of the input field
+        window.playerEmail = window.emailInputField.value();
+        window.emailInputActive = false;
+        
+        // Hide the input field
+        window.emailInputField.hide();
+        window.emailInputField.position(-1000, -1000); // Move off-screen
+        
+        console.log("Email input field deactivated, value saved: " + window.playerEmail);
+      }
+    });
+  }, 1000); // Wait 1 second for everything to initialize
+});
+
+// Ensure the email input field is properly reset when the game resets
+function resetEmailInput() {
+  if (window.emailInputField) {
+    window.emailInputField.value('');
+    window.emailInputField.hide();
+    window.emailInputField.position(-1000, -1000);
+    window.emailInputActive = false;
+    window.playerEmail = '';
+    window.emailSubmitted = false;
+  }
+}
+
+// If the original resetGame function exists, hook into it
+if (typeof window.originalResetGame === 'undefined' && typeof window.resetGame === 'function') {
+  window.originalResetGame = window.resetGame;
+  window.resetGame = function() {
+    window.originalResetGame();
+    resetEmailInput();
+  };
+}
+
+/*
+ * EMAIL INPUT FIX FOR STICK FIGHTER GAME
+ * 
  * The issue with the email input not working is likely due to how p5.js handles keyboard events.
  * Here are the changes needed to fix the issue:
  */
