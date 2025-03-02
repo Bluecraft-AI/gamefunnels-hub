@@ -1,10 +1,10 @@
 # Stick Fighter - Windows XP Edition
 
-A retro-inspired stick figure fighting game with a Windows XP theme, part of the [Game Funnels](http://run.gamefunnels.ai) collection.
+A retro-inspired stick figure fighting game with a Windows XP theme, part of the [Game Funnels](http://gamefunnels.ai) collection.
 
 ## Play the Game
 
-You can play the game online at [run.gamefunnels.ai/stick-fighter/](http://run.gamefunnels.ai/stick-fighter/)
+You can play the game online at [gamefunnels.ai/stick-fighter/](http://gamefunnels.ai/stick-fighter/)
 
 ## Game Features
 

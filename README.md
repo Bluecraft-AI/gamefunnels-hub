@@ -1,14 +1,14 @@
 # Game Funnels Hub
 
-This repository serves as the main hub for the Game Funnels collection of retro-inspired browser games, hosted at [run.gamefunnels.ai](http://run.gamefunnels.ai).
+This repository serves as the main hub for the Game Funnels collection of retro-inspired browser games, hosted at [gamefunnels.ai](http://gamefunnels.ai).
 
 ## Available Games
 
-- [Stick Fighter](http://run.gamefunnels.ai/stick-fighter/) - A Windows XP-themed stick figure fighting game with local multiplayer.
+- [Stick Fighter](http://gamefunnels.ai/stick-fighter/) - A Windows XP-themed stick figure fighting game with local multiplayer.
 
 ## How It Works
 
-This repository is set up as the main GitHub Pages site for the custom domain `run.gamefunnels.ai`. Games are hosted as subdirectories within this repository and are accessible as subpaths of the main domain.
+This repository is set up as the main GitHub Pages site for the custom domain `gamefunnels.ai`. Games are hosted as subdirectories within this repository and are accessible as subpaths of the main domain.
 
 ## Repository Structure
 
@@ -29,7 +29,7 @@ The hub page is built with HTML, CSS, and JavaScript. Feel free to improve the d
 
 ## DNS Configuration
 
-The site is configured with a CNAME record for `run.gamefunnels.ai` pointing to `Bluecraft-AI.github.io`.
+The site is configured with a CNAME record for `gamefunnels.ai` pointing to `Bluecraft-AI.github.io`.
 
 ## License
 
