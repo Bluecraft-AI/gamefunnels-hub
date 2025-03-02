@@ -11,16 +11,17 @@ let supabase;
 // Email collection variables
 let playerEmail = '';
 let emailSubmitted = false;
-let emailInputActive = false;
 let submitSuccess = false;
 let submitError = false;
 let errorMessage = '';
-let emailInputField; // DOM input element for email
 let submissionInProgress = false; // Flag to prevent multiple submissions
 
 // Add a variable to track the last key press time
 let lastKeyPressTime = 0;
 const KEY_DEBOUNCE_TIME = 150; // Milliseconds to wait between key presses
+
+// Add a variable to track if the email modal is currently open
+let emailModalOpen = false;
 
 // Setup function to initialize the game
 function setup() {
@@ -47,30 +48,128 @@ function setup() {
     console.error('Error initializing Supabase client:', error);
   }
   
-  // Create email input field directly (no container)
-  emailInputField = createInput('');
-  emailInputField.style('font-family', 'monospace');
-  emailInputField.style('font-size', '16px');
-  emailInputField.style('padding', '5px 10px');
-  emailInputField.style('width', '250px');
-  emailInputField.style('height', '30px');
-  emailInputField.style('border', '2px solid #0078D7');
-  emailInputField.style('border-radius', '5px');
-  emailInputField.style('background-color', 'rgba(240, 248, 255, 0.95)');
-  emailInputField.style('box-sizing', 'border-box');
-  emailInputField.style('outline', 'none');
-  emailInputField.style('position', 'absolute');
-  emailInputField.style('z-index', '100');
-  emailInputField.attribute('maxlength', '50');
-  emailInputField.attribute('placeholder', 'Enter your email');
-  emailInputField.position(-1000, -1000); // Position off-screen initially
-  emailInputField.hide(); // Hide initially
+  // Create email modal when the game loads
+  setupEmailModal();
+}
+
+// Create a simple email modal overlay
+function setupEmailModal() {
+  console.log("Setting up email modal...");
   
-  // Add event listener for input changes
-  emailInputField.input(function() {
-    playerEmail = this.value();
-    console.log("Email input updated via DOM: " + playerEmail);
+  // Create a modal dialog with inline styles
+  const emailModal = document.createElement('div');
+  emailModal.id = 'simple-email-modal';
+  emailModal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.7); z-index:99999;';
+  
+  // Create the modal content
+  emailModal.innerHTML = `
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background-color:white; padding:20px; border-radius:8px; width:300px; text-align:center; font-family:sans-serif;">
+      <h3 style="margin-top:0; color:#0078D7;">Enter Your Email</h3>
+      <p>Get your detailed match results</p>
+      <input type="email" id="simple-email-input" placeholder="your.email@example.com" 
+             style="width:100%; padding:8px; box-sizing:border-box; border:2px solid #0078D7; border-radius:4px; font-size:16px;">
+      <div style="margin-top:15px;">
+        <button id="simple-email-submit" style="background-color:#0078D7; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:bold;">Submit</button>
+        <button id="simple-email-cancel" style="background-color:#f0f0f0; color:#333; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-left:10px;">Cancel</button>
+      </div>
+    </div>
+  `;
+  
+  // Add the modal to the document body
+  document.body.appendChild(emailModal);
+  
+  // Get references to elements
+  const emailInput = document.getElementById('simple-email-input');
+  const submitButton = document.getElementById('simple-email-submit');
+  const cancelButton = document.getElementById('simple-email-cancel');
+  
+  // Add event listeners
+  submitButton.addEventListener('click', function() {
+    const email = emailInput.value.trim();
+    if (email) {
+      playerEmail = email;
+      hideEmailModal();
+      
+      if (gameState === 'ended' && !emailSubmitted) {
+        // Get the winner
+        let winner = "";
+        if (p1.health <= 0) {
+          winner = "Player 2";
+        } else if (p2.health <= 0) {
+          winner = "Player 1";
+        }
+        submitMatchResults(winner);
+      }
+    } else {
+      // Highlight the input if empty
+      emailInput.style.borderColor = 'red';
+      setTimeout(() => emailInput.style.borderColor = '#0078D7', 1000);
+    }
   });
+  
+  cancelButton.addEventListener('click', function() {
+    hideEmailModal();
+  });
+  
+  emailInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const email = emailInput.value.trim();
+      if (email) {
+        playerEmail = email;
+        hideEmailModal();
+        
+        if (gameState === 'ended' && !emailSubmitted) {
+          // Get the winner
+          let winner = "";
+          if (p1.health <= 0) {
+            winner = "Player 2";
+          } else if (p2.health <= 0) {
+            winner = "Player 1";
+          }
+          submitMatchResults(winner);
+        }
+      } else {
+        // Highlight the input if empty
+        emailInput.style.borderColor = 'red';
+        setTimeout(() => emailInput.style.borderColor = '#0078D7', 1000);
+      }
+    }
+  });
+  
+  // Close modal when clicking outside
+  emailModal.addEventListener('click', function(e) {
+    if (e.target === emailModal) {
+      hideEmailModal();
+    }
+  });
+  
+  console.log("Email modal setup complete");
+}
+
+// Function to show the email modal
+function showEmailModal() {
+  const emailModal = document.getElementById('simple-email-modal');
+  const emailInput = document.getElementById('simple-email-input');
+  
+  if (emailModal && emailInput) {
+    emailModal.style.display = 'block';
+    emailInput.focus();
+    emailModalOpen = true;
+    
+    // If we already have an email, pre-fill it
+    if (playerEmail) {
+      emailInput.value = playerEmail;
+    }
+  }
+}
+
+// Function to hide the email modal
+function hideEmailModal() {
+  const emailModal = document.getElementById('simple-email-modal');
+  if (emailModal) {
+    emailModal.style.display = 'none';
+    emailModalOpen = false;
+  }
 }
 
 // Global variables to track left and right shift states
@@ -316,45 +415,40 @@ function drawEndScreen() {
   fill(255, 235, 0);
   rect(width/2 - 20, height/2 - 100, 40, 40);
   
-  // Email collection section
-  fill(0);
-  textSize(16);
-  textAlign(CENTER, CENTER);
-  
   if (!emailSubmitted) {
+    // Email collection section
+    fill(0);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    
     // Keep text inside the white box with 10pt padding from the blue outline
     text("Enter your email to get", width/2, height/2 - 40);
     text("detailed match results:", width/2, height/2 - 15);
     
-    // Only draw the input box background when the DOM input is NOT active
-    if (!emailInputActive) {
-      // Normal input box (only drawn when DOM input is not visible)
-      fill(255);
-      stroke(180);
-      strokeWeight(1);
-      rect(width/2 - 125, height/2, 250, 30, 5);
-      
-      // Draw placeholder text when input is empty
-      if (playerEmail === '') {
-        fill(150);
-        textAlign(LEFT, CENTER);
-        text("Click to enter email", width/2 - 115, height/2 + 15);
-      } else {
-        // Show the email text when not active but has content
-        fill(0);
-        textAlign(LEFT, CENTER);
-        text(playerEmail, width/2 - 115, height/2 + 15);
-      }
+    // Draw the input box background
+    fill(255);
+    stroke(180);
+    strokeWeight(1);
+    rect(width/2 - 125, height/2, 250, 30, 5);
+    
+    // Draw placeholder text when input is empty
+    if (playerEmail === '') {
+      fill(150);
+      textAlign(LEFT, CENTER);
+      text("Click to enter email", width/2 - 115, height/2 + 15);
+    } else {
+      // Show the email text when not active but has content
+      fill(0);
+      textAlign(LEFT, CENTER);
+      text(playerEmail, width/2 - 115, height/2 + 15);
     }
     
-    // Get Results button - moved down slightly
+    // Get Results button
     if (drawXPButton("GET GAME RESULTS", width/2 - 100, height/2 + 50, 200, 40)) {
-      // Get the latest value from the input field if it's active
-      if (emailInputActive) {
-        playerEmail = emailInputField.value();
-      }
-      
-      if (validateEmail(playerEmail)) {
+      if (!playerEmail) {
+        // Show the email modal if no email entered yet
+        showEmailModal();
+      } else if (validateEmail(playerEmail)) {
         submitMatchResults(winner);
       } else {
         submitError = true;
@@ -362,27 +456,25 @@ function drawEndScreen() {
       }
     }
     
-    // Show submission status - adjusted position
+    // Show submission status
     if (submissionInProgress) {
       fill(0, 0, 150);
       textSize(12);
       textAlign(CENTER, CENTER);
       text("Submitting results...", width/2, height/2 + 100);
     }
-    // Display error message if there is one - adjusted position
-    else if (submitError) {
-      fill(255, 0, 0);
+    
+    if (submitError) {
+      fill(200, 0, 0);
       textSize(12);
       textAlign(CENTER, CENTER);
       text(errorMessage, width/2, height/2 + 100);
     }
-    
-    // Privacy notice removed
   } else if (submitSuccess) {
-    // Display player statistics instead of generic success message
+    // Display detailed match statistics
     textAlign(CENTER, TOP);
     fill(0, 100, 0);
-    textSize(16);
+    textSize(18);
     text("Match Statistics", width/2, height/2 - 40);
     
     // Draw a line to separate the title from stats
@@ -423,63 +515,31 @@ function drawEndScreen() {
     textSize(11);
     fill(0, 100, 0);
     text("Full results sent to: " + playerEmail, width/2, height/2 + 120);
-  } else {
-    // Error message - better spacing
-    fill(255, 0, 0);
-    textSize(16);
-    textAlign(CENTER, CENTER);
-    text("There was an error sending your results.", width/2, height/2 + 10);
-    text("Please try again later.", width/2, height/2 + 40);
   }
   
-  // Play Again button - moved down for better spacing
-  if (drawXPButton("PLAY AGAIN", width/2 - 80, height/2 + 150, 160, 40)) {
-    // Reset the game
+  // Play again button - only show if email modal is not open
+  if (!emailModalOpen && drawXPButton("PLAY AGAIN", width/2 - 80, height/2 + 150, 160, 40)) {
     resetGame();
   }
 }
 
-// Reset the game
+// Reset the game to start a new match
 function resetGame() {
-  p1.health = 100;
-  p2.health = 100;
-  p1.x = 200;
-  p2.x = 600;
-  p1.y = groundY;
-  p2.y = groundY;
-  p1.state = 'idle';
-  p2.state = 'idle';
+  // Reset players
+  p1 = new Character(200, groundY, { left: 65, right: 68, up: 87, down: 83, attack: 67, shield: 16 });
+  p2 = new Character(600, groundY, { left: 76, right: 222, up: 80, down: 186, attack: 188, shield: 16 });
   
-  // Reset statistics
-  p1.punchesThrown = 0;
-  p1.punchesLanded = 0;
-  p1.blocksPerformed = 0;
-  p1.damageDealt = 0;
-  p1.jumpsPerformed = 0;
-  p1.timeSpentDucking = 0;
+  // Reset game state
+  gameState = 'start';
   
-  p2.punchesThrown = 0;
-  p2.punchesLanded = 0;
-  p2.blocksPerformed = 0;
-  p2.damageDealt = 0;
-  p2.jumpsPerformed = 0;
-  p2.timeSpentDucking = 0;
-  
-  // Reset email collection variables
-  playerEmail = '';
+  // Reset email variables
   emailSubmitted = false;
-  emailInputActive = false;
   submitSuccess = false;
   submitError = false;
   errorMessage = '';
-  submissionInProgress = false; // Reset submission flag
+  submissionInProgress = false;
   
-  // Reset the DOM input field
-  emailInputField.value('');
-  emailInputField.hide();
-  emailInputField.position(-1000, -1000); // Move off-screen
-  
-  gameState = 'start';
+  // We keep playerEmail so returning players don't need to re-enter it
 }
 
 // Validate email format
@@ -498,14 +558,6 @@ async function submitMatchResults(winner) {
   
   // Set flag to prevent multiple submissions
   submissionInProgress = true;
-  
-  // If email input is active, get the latest value
-  if (emailInputActive) {
-    playerEmail = emailInputField.value();
-    emailInputActive = false;
-    emailInputField.hide();
-    emailInputField.position(-1000, -1000); // Move off-screen
-  }
   
   // Prepare match data
   const matchData = {
@@ -531,28 +583,29 @@ async function submitMatchResults(winner) {
     }
   };
   
+  console.log('Submitting match data:', matchData);
+  
   try {
-    // Insert data into Supabase
+    // Submit to Supabase
     const { data, error } = await supabase
       .from('match_results')
       .insert([matchData]);
-      
+    
     if (error) {
-      console.error('Error submitting match results:', error);
+      console.error('Error submitting match data:', error);
       submitError = true;
-      errorMessage = "Error saving results: " + error.message;
-      submissionInProgress = false; // Reset flag on error to allow retry
+      errorMessage = "Error: " + (error.message || "Unknown error");
     } else {
-      console.log('Match results submitted successfully:', data);
+      console.log('Match data submitted successfully:', data);
       emailSubmitted = true;
       submitSuccess = true;
-      // Keep submissionInProgress true to prevent further submissions
     }
   } catch (error) {
-    console.error('Exception submitting match results:', error);
+    console.error('Exception submitting match data:', error);
     submitError = true;
-    errorMessage = "Error: " + error.message;
-    submissionInProgress = false; // Reset flag on error to allow retry
+    errorMessage = "Error: " + (error.message || "Unknown error");
+  } finally {
+    submissionInProgress = false;
   }
 }
 
@@ -705,128 +758,81 @@ function drawWindowsLogo(x, y, size) {
 
 // Handle key presses
 function keyPressed() {
-  console.log("Key pressed: " + key + ", keyCode: " + keyCode);
-  
-  // If email input is active, don't handle any keyboard events
-  if (gameState === 'ended' && emailInputActive) {
-    return true; // Let the DOM input handle all keyboard events
+  // Don't process key presses when the email modal is open
+  if (emailModalOpen) {
+    return true; // Let the browser handle keyboard events for the modal
   }
   
-  // Only handle space bar for pausing when in playing or paused state
+  // Prevent default behavior for certain keys
   if (keyCode === 32) { // Space bar
-    if (gameState === 'playing') {
+    return false; // Prevent default behavior (page scrolling)
+  }
+  
+  // Only process key presses if enough time has passed since the last one
+  const currentTime = millis();
+  if (currentTime - lastKeyPressTime < KEY_DEBOUNCE_TIME) {
+    return false; // Ignore key press if it's too soon after the last one
+  }
+  lastKeyPressTime = currentTime;
+  
+  // Handle game state changes
+  if (gameState === 'playing') {
+    if (keyCode === 27) { // ESC key
       gameState = 'paused';
-      return false; // Prevent default behavior
-    } else if (gameState === 'paused') {
+      return false;
+    }
+  } else if (gameState === 'paused') {
+    if (keyCode === 27) { // ESC key
       gameState = 'playing';
-      return false; // Prevent default behavior
+      return false;
+    }
+  } else if (gameState === 'ended') {
+    // Don't process other keys if we're in the email input
+    if (keyCode === 82) { // 'R' key
+      resetGame();
+      return false;
     }
   }
   
-  // Only allow 'R' key to reset game when not typing in email field
-  if (gameState === 'ended' && !emailInputActive && keyCode === 82) { // 'R' key
-    resetGame();
-    return false; // Prevent default behavior
-  }
-  
-  // Start game with ENTER key only in start state
-  if (gameState === 'start' && keyCode === ENTER) {
-    gameState = 'playing';
-    matchStartTime = millis(); // Record match start time
-    return false; // Prevent default behavior
-  }
-  
-  // Allow default behavior for other keys
-  return true;
+  return true; // Allow default behavior for other keys
 }
 
 // Handle mouse clicks for buttons
 function mousePressed() {
-  console.log("Mouse pressed at: " + mouseX + ", " + mouseY + " | Game state: " + gameState);
+  // Don't process mouse clicks when the email modal is open
+  if (emailModalOpen) {
+    return false;
+  }
   
+  // Handle mouse clicks based on game state
   if (gameState === 'start') {
-    // Check if start button is clicked - updated y coordinates to match new position
+    // Check if start button is clicked
     if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && 
-        mouseY > 450 && mouseY < 500) {
-      gameState = 'playing';
-      matchStartTime = millis(); // Record match start time
-      return false; // Prevent default behavior
-    }
-  } else if (gameState === 'paused') {
-    // Check if resume button is clicked
-    if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && 
-        mouseY > height/2 + 120 && mouseY < height/2 + 160) {
-      gameState = 'playing';
+        mouseY > height/2 + 50 && mouseY < height/2 + 90) {
+      startGame();
       return false; // Prevent default behavior
     }
   } else if (gameState === 'ended') {
-    // Check if email input field is clicked - updated coordinates
+    // Check if email input area is clicked
     if (!emailSubmitted && 
         mouseX > width/2 - 125 && mouseX < width/2 + 125 && 
         mouseY > height/2 && mouseY < height/2 + 30) {
       
-      // Toggle email input active state
-      emailInputActive = true;
-      
-      // Get the canvas element for positioning
-      let canvas = document.querySelector('canvas');
-      let canvasRect = canvas.getBoundingClientRect();
-      
-      // Calculate scaling factors in case the canvas is displayed at a different size
-      let scaleX = canvasRect.width / width;
-      let scaleY = canvasRect.height / height;
-      
-      // Use fixed coordinates relative to the canvas, adjusted for scaling
-      let fixedX = width/2 - 125; // Left edge of our drawn box
-      let fixedY = height/2; // Top edge of our drawn box - updated
-      
-      // Calculate the absolute position in the window with scaling
-      let absoluteX = canvasRect.left + fixedX * scaleX;
-      let absoluteY = canvasRect.top + fixedY * scaleY;
-      
-      console.log("Canvas rect:", canvasRect);
-      console.log("Scale factors:", scaleX, scaleY);
-      console.log("Fixed position:", fixedX, fixedY);
-      console.log("Absolute position:", absoluteX, absoluteY);
-      
-      // Position and show the input field
-      emailInputField.position(absoluteX, absoluteY);
-      emailInputField.show();
-      emailInputField.elt.focus();
-      
-      console.log("Email input field activated");
-      return false; // Prevent default behavior
-    } 
-    // Check if clicking outside the input field - updated coordinates
-    else if (emailInputActive) {
-      // Check if click is outside the input area
-      if (!(mouseX > width/2 - 125 && mouseX < width/2 + 125 && 
-            mouseY > height/2 && mouseY < height/2 + 30)) {
-        
-        // Update playerEmail with the current value of the input field
-        playerEmail = emailInputField.value();
-        emailInputActive = false;
-        
-        // Hide the input field
-        emailInputField.hide();
-        emailInputField.position(-1000, -1000); // Move off-screen
-        
-        console.log("Email input field deactivated, value saved: " + playerEmail);
-      }
-    }
-    
-    // Check if play again button is clicked - updated coordinates
-    if (mouseX > width/2 - 80 && mouseX < width/2 + 80 && 
-        mouseY > height/2 + 150 && mouseY < height/2 + 190) {
-      resetGame();
+      // Show the email modal
+      showEmailModal();
       return false; // Prevent default behavior
     }
     
-    // Check if get results button is clicked - updated coordinates
-    if (!emailSubmitted && !submissionInProgress &&
+    // Check if GET GAME RESULTS button is clicked
+    if (!emailSubmitted &&
         mouseX > width/2 - 100 && mouseX < width/2 + 100 && 
         mouseY > height/2 + 50 && mouseY < height/2 + 90) {
-      if (validateEmail(playerEmail)) {
+      
+      if (!playerEmail) {
+        // Show the email modal if no email entered yet
+        showEmailModal();
+      } else {
+        // Submit with existing email
         let winner = "";
         if (p1.health <= 0) {
           winner = "Player 2";
@@ -834,15 +840,18 @@ function mousePressed() {
           winner = "Player 1";
         }
         submitMatchResults(winner);
-      } else {
-        submitError = true;
-        errorMessage = "Please enter a valid email address";
       }
       return false; // Prevent default behavior
     }
+    
+    // Check if play again button is clicked
+    if (mouseX > width/2 - 80 && mouseX < width/2 + 80 && 
+        mouseY > height/2 + 150 && mouseY < height/2 + 190) {
+      resetGame();
+      return false; // Prevent default behavior
+    }
   }
-  
-  return true; // Allow default behavior for other mouse clicks
+  return true; // Allow default behavior for other clicks
 }
 
 // Character class
@@ -1207,4 +1216,10 @@ function updateKeyStates() {
 // Helper function to set the default font - moved to a separate function for clarity
 function setTextFont() {
   textFont('monospace');
+}
+
+// Start a new game
+function startGame() {
+  gameState = 'playing';
+  matchStartTime = millis(); // Record match start time
 }
