@@ -1,28 +1,53 @@
-# Game Funnels Hub
+# Stick Fighter - Windows XP Edition
 
-This repository serves as the main hub for the Game Funnels collection of retro-inspired browser games, hosted at [run.gamefunnels.ai](http://run.gamefunnels.ai).
+A retro-inspired stick figure fighting game with a Windows XP theme, part of the [Game Funnels](http://run.gamefunnels.ai) collection.
 
-## Available Games
+## Play the Game
 
-- [Stick Fighter](http://run.gamefunnels.ai/stick-fighter/) - A Windows XP-themed stick figure fighting game with local multiplayer.
+You can play the game online at [run.gamefunnels.ai/stick-fighter/](http://run.gamefunnels.ai/stick-fighter/)
 
-## How It Works
+## Game Features
 
-This repository is set up as the main GitHub Pages site for the custom domain `run.gamefunnels.ai`. Individual games are hosted in separate repositories and are accessible as subpaths of the main domain.
+- Local multiplayer fighting game
+- Windows XP-inspired interface
+- Two-player combat with health bars and damage indicators
+- Special moves and blocking mechanics
+- Match statistics tracking
+- Email submission for detailed match results
 
-## Adding New Games
+## How to Play
 
-To add a new game to the collection:
+### Controls
 
-1. Create a new repository for the game
-2. Enable GitHub Pages for that repository
-3. Do NOT add a CNAME file to the game repository
-4. Update this hub's index.html to include a link to the new game
+**Player 1 (Blue):**
+- W: Jump
+- A: Move Left
+- D: Move Right
+- S: Block
+- F: Punch
+
+**Player 2 (Red):**
+- Up Arrow: Jump
+- Left Arrow: Move Left
+- Right Arrow: Move Right
+- Down Arrow: Block
+- L: Punch
+
+## Technical Details
+
+The game is built using:
+- p5.js for rendering and game logic
+- Supabase for storing match results
 
 ## Development
 
-The hub page is built with HTML, CSS, and JavaScript. Feel free to improve the design or add new features to enhance the game collection experience.
+To modify or extend the game:
+
+1. Clone this repository
+2. Make your changes to the code
+3. Test locally by opening index.html in a browser
+4. Submit a pull request with your improvements
 
 ## License
 
-All rights reserved. The games and hub design are proprietary and may not be reproduced without permission. 
+All rights reserved. This game is proprietary and may not be reproduced without permission. 
