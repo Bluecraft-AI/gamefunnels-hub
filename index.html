@@ -53,6 +53,12 @@
             color: #666;
             font-weight: bold;
         }
+        .game-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
         .game-info {
             padding: 1.5rem;
         }
@@ -97,10 +103,12 @@
         <h2>Available Games</h2>
         <div class="games-grid">
             <div class="game-card">
-                <div class="game-image">https://github.com/Bluecraft-AI/gamefunnels-hub/blob/main/images/Stick%20Fighter%20Image.png?raw=true</div>
+                <div class="game-image">
+                    <img src="https://github.com/Bluecraft-AI/gamefunnels-hub/blob/main/images/Stick%20Fighter%20Image.png?raw=true" alt="Stick Fighter Game Screenshot">
+                </div>
                 <div class="game-info">
                     <h3 class="game-title">Stick Fighter</h3>
-                    <p class="game-description">A Windows XP-themed stick figure fighting game. Challenge a friend to a local multiplayer duel!</p>
+                    <p class="game-description">A retro-themed stick figure fighting game. Challenge a friend to a local multiplayer duel!</p>
                     <a href="/stick-fighter/" class="play-button">Play Now</a>
                 </div>
             </div>
@@ -122,4 +130,4 @@
         <p>&copy; 2023 Game Funnels. All rights reserved.</p>
     </footer>
 </body>
-</html> 
+</html>
