@@ -4,11 +4,11 @@ This repository serves as the main hub for the Game Funnels collection of retro-
 
 ## Available Games
 
-- [Stick Fighter](http://gamefunnels.ai/stick-fighter/) - A Windows XP-themed stick figure fighting game with local multiplayer.
+- [Stick Fighter](http://gamefunnels.ai/stick-fighter/) - A retro-themed stick figure fighting game with local multiplayer.
 
 ## How It Works
 
-This repository is set up as the main GitHub Pages site for the custom domain `gamefunnels.ai`. Games are hosted as subdirectories within this repository and are accessible as subpaths of the main domain.
+This repository is set up as the main GitHub Pages site for the custom domain `gamefunnels.ai`. Games are hosted as subfolders within this repository and are accessible as subpaths of the main domain.
 
 ## Repository Structure
 
@@ -19,8 +19,8 @@ This repository is set up as the main GitHub Pages site for the custom domain `g
 
 To add a new game to the collection:
 
-1. Create a new subdirectory in this repository for the game
-2. Add all the game files to that subdirectory
+1. Create a new subfolder in this repository for the game
+2. Add all the game files to that subfolder
 3. Update the main index.html to include a link to the new game
 
 ## Development
