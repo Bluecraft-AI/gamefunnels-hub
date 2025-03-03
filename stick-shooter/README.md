@@ -41,7 +41,7 @@ Collect power-ups to gain advantages:
 
 ### Objective
 
-Survive as long as possible while defeating enemies. Your score increases as you defeat enemies. The game ends when your health reaches zero or when the time limit is reached.
+Survive as long as possible while defeating enemies. Your score increases as you defeat enemies. The game ends when your health reaches zero.
 
 ## Game Statistics
 

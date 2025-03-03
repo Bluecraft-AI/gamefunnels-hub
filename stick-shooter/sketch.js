@@ -7,7 +7,7 @@ let powerUps = [];
 let groundY;
 let score = 0;
 let gameStartTime;
-let gameTimeLimit = 60; // Game time limit in seconds
+let gameTimeLimit = 999999; // Effectively infinite time limit
 let minGameDuration = 5; // Minimum game duration in seconds
 let gameEndingTriggered = false;
 let debugMode = false; // Debug mode disabled by default
@@ -504,19 +504,19 @@ function applyPowerUp(character, type) {
 // Draw game UI (health bars, etc.)
 function drawGameUI() {
   // Draw health bar for player
-  drawXPHealthBar(20, 20, 200, 20, p1.health, "Player");
+  drawXPHealthBar(20, 20, 200, 20, p1.health, "Health");
   
-  // Draw score
-  textAlign(CENTER, TOP);
+  // Draw score - aligned with health bar
+  textAlign(CENTER, CENTER);
   fill(0);
-  textSize(24);
-  text("Score: " + score, width/2, 50);
+  textSize(20); // Slightly smaller to match health bar height
+  text("Score: " + score, width/2, 30); // y=30 aligns with the center of the health bar
   
-  // Draw active power-ups
+  // Draw power-up indicators
   let powerUpY = 50;
-  textAlign(LEFT, CENTER);
-  fill(0);
+  textAlign(LEFT, TOP);
   textSize(14);
+  fill(0);
   
   if (p1.rapidFireTimer > 0) {
     text("Rapid Fire: " + Math.ceil(p1.rapidFireTimer / 60) + "s", 20, powerUpY);
@@ -532,25 +532,9 @@ function drawGameUI() {
     text("Shield: " + Math.ceil(p1.shieldTimer / 60) + "s", 20, powerUpY);
   }
   
-  // Draw match timer
-  textAlign(CENTER, TOP);
-  fill(0);
-  textSize(16);
+  // Calculate match duration for statistics (but don't display timer)
   let currentTime = millis();
   matchDuration = (currentTime - matchStartTime) / 1000; // Convert to seconds
-  
-  // Calculate remaining time
-  let remainingTime = gameTimeLimit - matchDuration;
-  if (remainingTime < 0) remainingTime = 0;
-  
-  // Display timer with different colors based on remaining time
-  if (remainingTime <= 10) {
-    fill(255, 0, 0); // Red when time is running out
-  } else if (remainingTime <= 30) {
-    fill(255, 165, 0); // Orange when time is getting low
-  }
-  
-  text("Time: " + remainingTime.toFixed(1) + "s", width/2, 20);
   
   // Draw shots fired counter
   textAlign(RIGHT, TOP);
@@ -592,7 +576,7 @@ function updateScoreAnimations() {
 function checkGameOver() {
   // In single player mode, game ends when:
   // 1. Player health reaches 0
-  // 2. Time limit is reached
+  // Time limit check has been removed
   
   // Ensure we don't end the game too early
   if (matchDuration < minGameDuration) {
@@ -619,19 +603,7 @@ function checkGameOver() {
     return;
   }
   
-  // Check if time limit is reached
-  if (matchDuration >= gameTimeLimit) {
-    if (!gameEndingTriggered) {
-      console.log("Game over: Time limit reached");
-      gameEndingTriggered = true;
-      // Use setTimeout to delay the game state change slightly
-      setTimeout(() => {
-        if (gameState === 'playing') {
-          gameState = 'ended';
-        }
-      }, 500);
-    }
-  }
+  // Time limit check has been removed
 }
 
 // Draw the pause screen
@@ -725,12 +697,8 @@ function drawEndScreen() {
   textSize(24);
   textAlign(CENTER, CENTER);
   
-  // Determine end game message based on how the game ended
-  if (p1.health <= 0) {
-    text("You Died!", width/2, height/2 - 150);
-  } else {
-    text("Time's Up!", width/2, height/2 - 150);
-  }
+  // Only show "You Died!" message since time limit has been removed
+  text("You Died!", width/2, height/2 - 150);
   
   // Display final score
   textSize(32);
@@ -1047,7 +1015,8 @@ function drawXPHealthBar(x, y, w, h, health, label) {
     line(x + i, y, x + i, y + h);
   }
   
-  // Label
+  // Label with black text
+  fill(0); // Set text color to black
   textSize(10);
   textAlign(CENTER, CENTER);
   text(label, x + w/2, y + h/2);
