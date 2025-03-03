@@ -788,18 +788,19 @@ function drawEndScreen() {
     text("Accuracy: " + (p1.shotsFired > 0 ? Math.round((p1.shotsHit / p1.shotsFired) * 100) : 0) + "%", width/2 - 140, height/2 + 75);
     text("Power-ups: " + p1.powerUpsCollected, width/2 - 140, height/2 + 95);
     text("Final Score: " + score, width/2 - 140, height/2 + 115);
-    
-    // Email confirmation
-    textAlign(CENTER, TOP);
-    textSize(11);
-    fill(0, 100, 0);
-    text("Full results sent to: " + playerEmail, width/2, height/2 + 140);
   }
   
-  // Play again button - only show if email modal is not open
-  if (!emailModalOpen && drawXPButton("PLAY AGAIN", width/2 - 80, height/2 + 180, 160, 40)) {
-    resetGame();
-  }
+  // Draw play again button with more prominence
+  fill(0, 120, 215); // Windows blue color
+  stroke(0, 84, 227);
+  strokeWeight(2);
+  rect(width/2 - 100, height/2 + 150, 200, 40, 5);
+  
+  fill(255); // White text
+  noStroke();
+  textSize(18);
+  textAlign(CENTER, CENTER);
+  text("Play Again", width/2, height/2 + 170);
 }
 
 // Reset the game to start a new match
@@ -1063,6 +1064,11 @@ function drawWindowsLogo(x, y, size) {
 
 // Handle key presses
 function keyPressed() {
+  // Don't process game key presses when the email modal is open
+  if (emailModalOpen) {
+    return true; // Allow default behavior for typing in email field
+  }
+  
   // Game controls based on current state
   if (gameState === 'start') {
     if (keyCode === ENTER) {
@@ -1077,11 +1083,14 @@ function keyPressed() {
       gameState = 'playing';
     }
   } else if (gameState === 'ended') {
-    if (keyCode === 82) { // R key
+    // Only allow 'R' key to restart if the email modal is not open
+    if (keyCode === 82 && !emailModalOpen) { // R key
       resetGame();
       gameState = 'start';
     }
   }
+  
+  return false; // Prevent default behavior for game keys
 }
 
 // Handle mouse clicks for buttons
@@ -1151,8 +1160,8 @@ function mousePressed() {
       return false; // Prevent default behavior
     }
     
-    // Check if play again button is clicked
-    if (mouseX > width/2 - 80 && mouseX < width/2 + 80 && 
+    // Check if play again button is clicked - updated dimensions to match new button
+    if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && 
         mouseY > height/2 + 150 && mouseY < height/2 + 190) {
       resetGame();
       return false; // Prevent default behavior
