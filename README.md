@@ -5,6 +5,7 @@ This repository serves as the main hub for the Game Funnels collection of retro-
 ## Available Games
 
 - [Stick Fighter](http://gamefunnels.ai/stick-fighter/) - A retro-themed stick figure fighting game with local multiplayer.
+- [Stick Shooter](http://gamefunnels.ai/stick-shooter/) - A retro-themed stick figure shooting game with power-ups and waves of enemies.
 
 ## How It Works
 
@@ -14,6 +15,7 @@ This repository is set up as the main GitHub Pages site for the custom domain `g
 
 - `/` - Main landing page with game listings
 - `/stick-fighter/` - Stick Fighter game files
+- `/stick-shooter/` - Stick Shooter game files
 
 ## Adding New Games
 
